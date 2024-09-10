@@ -156,7 +156,7 @@ curl http://llama3.model.192.168.2.100.sslip.io/v1/chat/completions   -H "Conten
    }'
 ```
 
-To use streaming.py
+To use streaming.py, edit the base_url variable in the client line, replacing the URL with your URL. Make sure to include the `/v1` at the end of the URL.
 ```
 from openai import OpenAI
 
@@ -177,6 +177,7 @@ for chunk in stream:
     if chunk.choices[0].delta.content is not None:
         print(chunk.choices[0].delta.content, end="")
 ```
+Then, run `python3 streaming.py`.
 
 ### 14. Enjoy!
 With the URL you have, you can send any open AI compliant requests as long as the proper chat template is specified in the inference service yaml file. If you wish to work with completions instead of chat, change the '--chat-template` argument value to point to an accepted template currently in the vllm container.
