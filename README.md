@@ -2,6 +2,11 @@
 
 ## Introdution
 
+This tutorial goes over creating a Kubernetes bare-metal cluster using kubeadm that has amd gpus that are compatible with vllm. This cluster will run inference services that allow testing of certain supported models. In this tutorial we use Llama 3.1 70B, which does require you to request access on huggingface for it, but you can replace the model with another for testing purposes. 
+
+We will be using docker engine for the containers, and the docker container runtime. We use Canal for the cluster networking, and MetalLB for load balancing and to also get an external IP for the inference service. With the external IP we can possibly port forward it on the router allowing users to make inference requests from remote without having to ssh into the cluster. However, MetalLB is not mandatory to set up an inference service if it is simply for testing.
+
+Also, ensure your cluster has enough resources for your deployment, and edit the models used and inference service file as needed to adjust for your use case.
 
 
 ## Prerequisites (for all nodes):
@@ -19,7 +24,7 @@ sudo swapoff -a
     - [Istio Required Ports][istio_ports]
     - may be easier to simply disable firewall with `sudo ufw disable` (if your deployment allows it)
         - If you plan on using huggingface or some other online storage for the model, it will be easier with firewall off
-- Ensure the ports are not in use either with `nc 127.0.0.1 \<port-num\> -v` where <port-num> is the port to check
+- Ensure the ports are not in use either with `nc 127.0.0.1 <port-num> -v` where <port-num> is the port to check
  
 
 [k8_ports]: https://kubernetes.io/docs/reference/networking/ports-and-protocols/
@@ -81,7 +86,7 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ### 7.  Add worker nodes [optional]
 -   Use the join command saved from before on the worker nodes after installing all requirements. You can reprint it by running `kubeadm token create --print-join-command` on the control plane node. Make sure to use `sudo` if running as a normal user.
 -   Run `kubectl get nodes` on the master node to ensure the worker node appears and is detected by the master node.
--   You can add roles for nodes by labelling the node with the following command (reokace /<node_name/> with the proper node name listed with `kubectl get nodes`:
+-   You can add roles for nodes by labelling the node with the following command (replace `<node_name>` with the proper node name listed with `kubectl get nodes`:
 ```
 kubectl label node <node_name>  node-role.kubernetes.io/worker=worker
 ```
@@ -98,7 +103,7 @@ Do so if you would like an external IP to send inference requests to instead of 
 ### 10. Install [KServe][kserve]
 - Ensure to follow all of its directions, including the Istio installation as it will be how we can route requests to our inference service.
 
-### 11. Optional: Install [vLLM in Docker container] [vllm]
+### 11. Optional: Install [vLLM in Docker container][vllm]
 -   One can also choose to use the container I have already created that works with MI series GPUs. However, you may have specific requirements in which it would be pr eferable to build your own container.
 -   Follow Option 1, building within a container
 -   After building it, make sure to push it to a valid repository so it can be called by the inference service. Make sure to update the image argument in the inference service to point to your container.
@@ -109,7 +114,7 @@ Do so if you would like an external IP to send inference requests to instead of 
 kubectl create namespace model
 ```
 Referring to the inference file linked in the repo named `llama3.1-openai-chat.yaml`:
--   Add your huggingface token in `spec.predictor.containers.env` (environmental variable), replacing `$HF_TOKEN` with your key. You can also simply update the `HF_TOKEN` bash variable to be your token with `export HF_TOKEN=<your_token>` by replacing `\<your_token\>` everytime before you wish to launch the inference service.
+-   Add your huggingface token in `spec.predictor.containers.env` (environmental variable), replacing `$HF_TOKEN` with your key. You can also simply update the `HF_TOKEN` bash variable to be your token with `export HF_TOKEN=<your_token>` by replacing `<your_token>` everytime before you wish to launch the inference service.
 -   If running on 7900s or other gpus that do not support NCCL P2P, make sure to uncomment the following lines in the llama3.1-openai-chat.yaml file:
 ```
 #        - name: NCCL_P2P_DISABLE
@@ -180,7 +185,7 @@ for chunk in stream:
 Then, run `python3 streaming.py`.
 
 ### 14. Enjoy!
-With the URL you have, you can send any open AI compliant requests as long as the proper chat template is specified in the inference service yaml file. If you wish to work with completions instead of chat, change the '--chat-template` argument value to point to an accepted template currently in the vllm container.
+Using the URL you have created you can send any open AI compliant requests as long as the proper chat template is specified in the inference service yaml file. If you wish to work with completions instead of chat, change the '--chat-template` argument value to point to an accepted template currently in the vllm container.
 
 
 [rocm]: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html
