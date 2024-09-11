@@ -2,7 +2,7 @@
 
 ## Introdution
 
-This tutorial goes over creating a Kubernetes bare-metal cluster using kubeadm that has amd gpus that are compatible with vllm. This cluster will run inference services that allow testing of certain supported models. In this tutorial we use Llama 3.1 70B, which does require you to request access on huggingface for it, but you can replace the model with another for testing purposes. 
+This tutorial goes over creating a Kubernetes bare-metal cluster using kubeadm that has AMD GPUs that are compatible with vllm. This cluster will run inference services that allow testing of certain supported models. In this tutorial we use Llama 3.1 70B, which does require you to request access on huggingface for it, but you can replace the model with another for testing purposes. 
 
 We will be using docker engine for the containers, and the docker container runtime. We use Canal for the cluster networking, and MetalLB for load balancing and to also get an external IP for the inference service. With the external IP we can possibly port forward it on the router allowing users to make inference requests from remote without having to ssh into the cluster. However, MetalLB is not mandatory to set up an inference service if it is simply for testing.
 
