@@ -1,6 +1,6 @@
 # Serving vLLM Models on Kubernetes Cluster with ROCm-Enabled AMD GPUs using KServe for Linux
 
-## Introdution
+## Introduction
 
 This tutorial goes over creating a Kubernetes bare-metal cluster using kubeadm that has AMD GPUs that are compatible with vllm. This cluster will run inference services that allow testing of certain supported models. In this tutorial we use Llama 3.1 70B, which does require you to request access on huggingface for it, but you can replace the model with another for testing purposes. 
 
@@ -18,9 +18,9 @@ sudo swapoff -a
 - Complete Network Connectivity between nodes
 - Unique hostname, MAC address, and product_uuid for every node (most likely already true)
     - check mac addresses with `ip link` or `ifconfig -a`
-    - check product_uiuds with `sudo cat /sys/class/dmi/id/product_uuid`
+    - check product_uuids with `sudo cat /sys/class/dmi/id/product_uuid`
 - Ensure the required ports for all components are open
-    - [Kuberernetes Required Ports][k8_ports]
+    - [Kubernetes Required Ports][k8_ports]
     - [Istio Required Ports][istio_ports]
     - may be easier to simply disable firewall with `sudo ufw disable` (if your deployment allows it)
         - If you plan on using huggingface or some other online storage for the model, it will be easier with firewall off
@@ -90,21 +90,21 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 ```
 kubectl label node <node_name>  node-role.kubernetes.io/worker=worker
 ```
-- You can repeat these 3 steps on as many worker nodes as you would like, as long as the prequisites and necessary isntallation steps have already been met for each node.
+- You can repeat these 3 steps on as many worker nodes as you would like, as long as the prequisites and necessary installation steps have already been met for each node.
 
 ### 8. Install ROCm support
 -   install [k8s ROCm plugin][rocm_plugin]
 -   make to use the labeller also specifed in the github to enable `amd.com/gpu` 
 
 ### 9. Install [MetalLB LoadBalancer][metallb] (optional, but I recommend)
-Do so if you would like an external IP to send inference requests to instead of only operating within tbe cluster using Cluster IPs.
+Do so if you would like an external IP to send inference requests to instead of only operating within the cluster using Cluster IPs.
 - Install by manifest and configure to set up [layer 2 networking][layer2]
 
 ### 10. Install [KServe][kserve]
 - Ensure to follow all of its directions, including the Istio installation as it will be how we can route requests to our inference service.
 
 ### 11. Optional: Install [vLLM in Docker container][vllm]
--   One can also choose to use the container I have already created that works with MI series GPUs. However, you may have specific requirements in which it would be pr eferable to build your own container.
+-   One can also choose to use the container I have already created that works with MI series GPUs. However, you may have specific requirements in which it would be preferable to build your own container.
 -   Follow Option 1, building within a container
 -   After building it, make sure to push it to a valid repository so it can be called by the inference service. Make sure to update the image argument in the inference service to point to your container.
 
