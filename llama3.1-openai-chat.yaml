@@ -24,7 +24,7 @@ spec:
         - "vllm.entrypoints.openai.api_server"
       env:
         - name: HUGGING_FACE_HUB_TOKEN
-          value: "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"
+          value: "insert token"
 #        - name: NCCL_P2P_DISABLE
 #          value: "1"
       ports:
